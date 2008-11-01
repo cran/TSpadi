@@ -7,11 +7,11 @@ padi <- function() {
   }
 
 # require("DBI") for this
-setClass("padiConnection", representation("DBIConnection",
+setClass("TSpadiConnection", contains=c("DBIConnection", "TSdb"),
+  representation(
    user = "character",
    password = "character",
    host = "character",
-   dbname="character",
    start.server = "logical",
    server.process = "character",
    cleanup.script = "character",
@@ -20,8 +20,6 @@ setClass("padiConnection", representation("DBIConnection",
    warn = "logical",
    timeout = "numeric")
    )
-
-
 
 setMethod("TSconnect",   signature(drv="padiDriver", dbname="character"),
   definition= function(drv, dbname, user=NULL, password = NULL, host=NULL,
@@ -45,11 +43,10 @@ setMethod("TSconnect",   signature(drv="padiDriver", dbname="character"),
    if (is.null(password)) password <-r$password
    if (is.null(host)) host <- r$host
    if(checkPADIserver(server=host, user=user, timeout=timeout) )   
-     new("padiConnection", 
+     new("TSpadiConnection", dbname=dbname, hasVintages=FALSE, hasPanels=FALSE,
     	  user = user,
     	  password = password,
     	  host = host,
-    	  dbname=dbname,
     	  start.server=   FALSE,
     	  server.process= PADIserverProcess(),
     	  cleanup.script= PADIcleanupScript(),
@@ -58,11 +55,11 @@ setMethod("TSconnect",   signature(drv="padiDriver", dbname="character"),
     	  warn = TRUE,
     	  timeout = timeout ) 
      else 
-       stop("Could not establish padiConnection to ", dbname, " on ", host)
+       stop("Could not establish TSpadiConnection to ", dbname, " on ", host)
    } )
 
 
-setMethod("TSdates",  signature(serIDs="character", con="padiConnection"),
+setMethod("TSdates",  signature(serIDs="character", con="TSpadiConnection"),
    definition= function(serIDs, con, ... )  
 {  # Indicate  dates for which data is available.
    # This requires retrieving series individually so they are not truncated.
@@ -113,7 +110,7 @@ setMethod("TSdates",  signature(serIDs="character", con="padiConnection"),
 } )
 
 
-setMethod("TSget",     signature(serIDs="character", con="padiConnection"),
+setMethod("TSget",     signature(serIDs="character", con="TSpadiConnection"),
    definition= function(serIDs, con, names=serIDs, ...)
 { # ... arguments unused
   # This function retreives data from a PADI server using getpadi
@@ -162,12 +159,13 @@ setMethod("TSget",     signature(serIDs="character", con="padiConnection"),
 # if ( !is.na(tffrequency(serIDs)) && (tffrequency(serIDs)) != tffrequency(r))
 #       warning("returned serIDs frequency differs from request.")
  TSmeta(r) <- new("TSmeta", serIDs=serIDs,  dbname=con@dbname, 
-     con=class(con), ExtractionDate= Sys.time(), TSdescription="", TSdoc="") 
+      hasVintages=con@hasVintages, hasPanels=con@hasPanels,
+      conType=class(con), DateStamp= Sys.time(), TSdescription="", TSdoc="") 
  r
 } )
 
 
-setMethod("TSput",     signature(x="ANY", serIDs="character", con="padiConnection"),
+setMethod("TSput",     signature(x="ANY", serIDs="character", con="TSpadiConnection"),
    definition= function(x, serIDs=seriesNames(data), con, ...)   
   {# This should return an object suitable for retrieving the data.
 
@@ -177,19 +175,25 @@ setMethod("TSput",     signature(x="ANY", serIDs="character", con="padiConnectio
          user=con$user, passwd=con@password,
          stop.on.error=con@stop.on.error, warn=con@warn, timeout=con@timeout ) 
 
-   if (!all(ok)) stop("error putting data on database.")
+   if (!all(ok)) warning("error putting data on database.")
   
-   list(con=con,  series=series)
+   new("logicalId", all(ok), 
+        TSid=new("TSid", serIDs=serIDs, dbname=con@dbname, 
+                 hasVintages=con@hasVintages, hasPanels=con@hasPanels,
+ 	         conType=class(con), DateStamp=NA))
   } )
 
 
-
-setMethod("TSdoc",   signature(x="character", con="padiConnection"),
-   definition= function(x, con=options()$TSconnection, ...)
-        "TSdoc for padi connection not supported." )
-
-setMethod("TSdescription",   signature(x="character", con="padiConnection"),
-   definition= function(x, con=options()$TSconnection, ...)
+setMethod("TSdescription",   signature(x="character", con="TSpadiConnection"),
+   definition= function(x, con=getOption("TSconnection"), ...)
         "TSdescription for padi connection not supported." )
 
+
+setMethod("TSdoc",   signature(x="character", con="TSpadiConnection"),
+   definition= function(x, con=getOption("TSconnection"), ...)
+        "TSdoc for padi connection not supported." )
+
+setMethod("TSlabel",   signature(x="character", con="TSpadiConnection"),
+   definition= function(x, con=getOption("TSconnection"), ...)
+        "TSlabel for padi connection not supported." )
 

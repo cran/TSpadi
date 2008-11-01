@@ -60,7 +60,7 @@ file causes an error building the vignette.
   
   options(TSconnection=conets)
 
-  TSdoc("M.SDR.CCUSMA02.ST")
+  # TSdoc("M.SDR.CCUSMA02.ST") not supported for TSpadi
   print(TSmeta("M.SDR.CCUSMA02.ST"))
   
   z <- TSget("M.SDR.CCUSMA02.ST")

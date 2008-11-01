@@ -28,7 +28,7 @@ export("padi")
 ## S4 Classes
 exportClasses(
    "padiDriver",
-   "padiConnection"
+   "TSpadiConnection"
    )
 
 ## S4 generics
@@ -38,8 +38,9 @@ exportClasses(
 exportMethods(
    "TSconnect",
    "TSdates",
-   "TSdoc",
    "TSdescription",
+   "TSdoc",
+   "TSlabel",
    "TSget",
    "TSput"
    )

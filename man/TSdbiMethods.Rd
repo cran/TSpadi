@@ -1,26 +1,28 @@
 \name{padi}
 \alias{padi}
 \alias{TSconnect,padiDriver,character-method}
-\alias{TSget,character,padiConnection-method}
-\alias{TSput,ANY,character,padiConnection-method}
-\alias{TSdates,character,padiConnection-method}
-\alias{TSdoc,character,padiConnection-method}
-\alias{TSdescription,character,padiConnection-method}
+\alias{TSget,character,TSpadiConnection-method}
+\alias{TSput,ANY,character,TSpadiConnection-method}
+\alias{TSdates,character,TSpadiConnection-method}
+\alias{TSdescription,character,TSpadiConnection-method}
+\alias{TSdoc,character,TSpadiConnection-method}
+\alias{TSlabel,character,TSpadiConnection-method}
 
 \alias{padiDriver-class}
-\alias{padiConnection-class}
+\alias{TSpadiConnection-class}
 
 \title{padi Methods for TSdbi Generics}
 \description{Get a time series matrix structure from a database}
 \usage{
      padi() 
-    \S4method{TSget}{character,padiConnection}(serIDs, con, names=serIDs, ...)
-    \S4method{TSput}{ANY,character,padiConnection}(x, serIDs=seriesNames(data), con, ...)   
+    \S4method{TSget}{character,TSpadiConnection}(serIDs, con, names=serIDs, ...)
+    \S4method{TSput}{ANY,character,TSpadiConnection}(x, serIDs=seriesNames(data), con, ...)   
     \S4method{TSconnect}{padiDriver,character}(drv, dbname, 
                user=NULL, password = NULL, host="", timeout=60, ...)
-    \S4method{TSdates}{character,padiConnection}(serIDs, con, ... )  
-    \S4method{TSdoc}{character,padiConnection}(x, con, ... )  
-    \S4method{TSdescription}{character,padiConnection}(x, con, ... )  
+    \S4method{TSdates}{character,TSpadiConnection}(serIDs, con, ... )  
+    \S4method{TSdescription}{character,TSpadiConnection}(x, con, ... )  
+    \S4method{TSdoc}{character,TSpadiConnection}(x, con, ... )  
+    \S4method{TSlabel}{character,TSpadiConnection}(x, con, ... )  
 }
 \arguments{
     \item{con}{a database connection object.}
@@ -44,7 +46,7 @@ It is usually better to pass host/user/password information using a
 configuration file rather than as arguments. \code{TSconnect} will look
 for a file \code{.padi.cfg} in the user's home directory.
 
-The classes \code{padiDriver} and \code{padiConnection} extend classes
+The classes \code{padiDriver} and \code{TSpadiConnection} extend classes
 \code{DBIDriver} and  \code{DBIConnection} in the DBI package.
 
  \code{TSput.padi} is not working.

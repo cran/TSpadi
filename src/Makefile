@@ -4,6 +4,8 @@
 VPATH=../exec
 
 CC=gcc
+CFLAGS= -fPIC
+
 # consider using rpcgen -N
 RPCGEN= rpcgen -C
 
@@ -93,8 +95,9 @@ cvsclean:	clean
 	@$(RM) ../exec/getpwuid ../exec/padi_simple_svc ../exec/x11arima
 	@$(RM) ../exec/*.pro ../exec/*server.log.*
 
-distclean: clean
+distclean: cvsclean
 #	@-rm -f Makefile
+
 maintainer-clean: distclean
 
 ## Automagically generated dependencies:

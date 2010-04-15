@@ -3,6 +3,7 @@
  * File:   getpadi.c
  * Author: Hope Pioro
  * Date  : Sept 95
+ *  Minor changes to remove compiler warnings. P. Gilbert, Nov 2009.
  *
  * Get PADI time series
  *
@@ -24,6 +25,7 @@
 */
 
 /*IN*/
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -308,7 +310,7 @@ char   *argv[];
     int     i;
     int    timeout =  TMOUTDEFAULT;   /* time to wait for reply */
     char    userbuf[L_cuserid+1];
-    int     j, year;
+
 
     /* Validate command-line arguments */
 
@@ -406,6 +408,7 @@ char   *argv[];
 #endif				/* not X11ARIMA */
 #ifdef X11ARIMA
      /* this is a format used as input to X11ARIMA at STC for Monthly data!! */
+        int     j, year;
         year = syear;
 	printf("%-8s%4d", objnam, year);
 	j = smon - 1;

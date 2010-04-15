@@ -1,0 +1,9 @@
+LIBSRC = padi.c padiutil.c channel.c rpcx_xdr.c gmalloc.c
+SRC = $(LIBSRC) getpadi.c  putpadi.c 
+
+OBJS = $(SRC:.c=.o) 
+
+all:    $(SHLIB) padi.dll
+
+padi.dll: $(SRC) dosrpcx.h rpcx.h
+	MAKEFLAGS="CPPFLAGS=-DMSDOS" Rcmd SHLIB  $(SRC)

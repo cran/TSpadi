@@ -1,9 +1,9 @@
-bbc3cefd19cd042bb45fc6a2ac2d936b *DESCRIPTION
+d1e44e6a4555e5dbeb0ff38f958b0ef0 *DESCRIPTION
 ddd24cfff8eca7b2b77a83a5b5b14ea5 *LICENSE
 84e978f25e29b4bc37c3d556d44b5dda *NAMESPACE
 8b850d9f4a1601a51dc974777b95be2c *NEWS
 df0e3d3c673c8a2c5d33b7fe72add2ff *R/TSdbiMethods.R
-e01ad2a94679cf9d31ff2227f4bab266 *R/padi.R
+8cfc006cda11e273026226600f4ee9ff *R/padi.R
 48a04e2a1c77ea3de0eca30e0975ebb0 *exec/add.db.to.server
 93579867453c6b7f535adf1ac21b92ac *exec/add.dependencies.to.server
 43c04380483051baa560a939e27b4e87 *exec/add.exceptions.to.server
@@ -16,8 +16,7 @@ e0f8d19bfff47afa956989795ba4dd97 *exec/add.writedb.to.server
 43f228dcb8a1ac30c9e5df187a31c332 *exec/fame.server
 05a9b30264e8dff0c286b6c9cabcf062 *exec/killserver
 8ea3200e2c3788e482934d5d94264bd6 *exec/simple.server
-680fce08b7391a109e4d68be7bf8cf61 *inst/doc/Guide.Stex
-40661c8be0e9cf353285c72916aea999 *inst/doc/Guide.pdf
+28e772fc5695defaaa75ec0a6110daa5 *inst/doc/Guide.pdf
 02bfb5d06bb533a97bce8c9703757f83 *man/PADIserver.Rd
 4e7dd7ea1a13fda402c343e418dcf9ff *man/TSdbiMethods.Rd
 152599fdece829d03b1256f1edaef1cc *man/checkPADIserver.Rd
@@ -46,3 +45,4 @@ f7a3645d7cf1772f10506319a63c69e9 *src/simple_svc.c
 4fa5f3b9e39acc6d2ceda82f53313f8f *src/stdtyp.h
 72d65e1aa14e3ba7e2d180cc2d0198a0 *src/sys.pro
 2c2fd2b3c6c66ef071de062de290867f *src/target.pro
+680fce08b7391a109e4d68be7bf8cf61 *vignettes/Guide.Stex

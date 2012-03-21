@@ -1,6 +1,10 @@
 #include <malloc.h>
 #include "define.h"
 
+#ifndef NOT_R_CLIENT
+extern void error(const char *, ...);
+#endif
+
 export size_t ngmalloced = 0;
 
 #define STAMP "GMALLOC!"
@@ -30,7 +34,12 @@ export char *grealloc PARAM2(char *, p, size_t, n)
 #endif
 
   if (!p || strncmp(STAMP, q, STAMP_SIZE) || !ngmalloced) 
-    abort();
+#ifdef NOT_R_CLIENT
+   abort(); 
+#else
+   error("error in gmalloc"); 
+#endif
+
 
   if (!(p = realloc(q,n + STAMP_SIZE)))
     return NULL;
@@ -47,7 +56,11 @@ export char *gfree PARAM1(char *, p)
   return p;
 #else
   if (!p || strncmp(STAMP, q, STAMP_SIZE) || !ngmalloced) 
-    abort();
+#ifdef NOT_R_CLIENT
+   abort(); 
+#else
+   error("error in gmalloc"); 
+#endif
 
   free(q);
   ngmalloced--;

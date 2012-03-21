@@ -1,7 +1,15 @@
+# It might be possible to incorporate this into Makevars, so normal R build
+#  is used for compiling the .so and pieces for it. In theory that might be
+#  more portable. This would require putting $(SHLIB) in the default target
+#  However, R then tries to compile fame_svc.c, 
+#  which fails unless fame headers are available, and there are
+#  several problems with rpcx.x generated code. 
+#  This may require considerable work, so leave Makefile in place, 
+
 # R CMD SHLIB padi.c getpadi.c putpadi.c padiutil.c channel.c rpcx_xdr.c gmalloc.c
 # WALL is good for testing, but rpcgen puts some unused variables in
 #   the code it generates, and those cause lots of warning messages.
-# WALL=-Wall
+#WALL=-Wall
 
 #VPATH=../exec
 
@@ -23,17 +31,26 @@ OTHEROBJECTS = $(OTHERSRC:.c=.o)
 all: rpcx.h padi.so ../exec/padi_simple_svc ../exec/getpwuid  ../exec/x11arima \
         ../exec/getpadi ../exec/putpadi ../exec/objectinfo
 
+$(PKGNAME).so: $(SRC) rpcx.h
+	$(R_HOME)/bin/R CMD SHLIB  $(SRC)
 
-$(PKGNAME).so: $(OBJS) rpcx.h
-	$(R_HOME)/bin/R CMD SHLIB  $(OBJS)
+#$(PKGNAME).so: $(OBJS) rpcx.h
+#	$(R_HOME)/bin/R CMD SHLIB  $(OBJS)
+
+#R_INCLUDE_DIR=$(R_HOME)lib/R/include $(R_HOME)/bin/R CMD SHLIB  $(OBJS)
+#$(R_HOME)/bin/R CMD SHLIB  $(PKG_CFLAGS) $(OBJS)
+#R CMD SHLIB  $(OBJS)
+#gcc -fPIC   -c -o padi.o padi.c
+
 
 #$(PKGNAME).so: $(OBJS) rpcx.h
 #	$(CC) -shared $(LD_LIBS) -o $(PKGNAME).so $(OBJS)
 
+NOTR=-DNOT_R_CLIENT -DR_NO_REMAP
 
 ../exec/padi_simple_svc:  simple_svc.c $(LIBSRC)  
 	$(RM) $(notdir $@)
-	$(CC) $(WALL) $(PKG_CFLAGS) $(PKG_CPPFLAGS) -DFS_SVC \
+	$(CC) $(WALL) $(PKG_CFLAGS) $(PKG_CPPFLAGS) -DFS_SVC $(NOTR)\
 	    simple_svc.c $(LIBSRC)  $(LD_LIBS) -o padi_simple_svc
 	mv padi_simple_svc ../exec
 
@@ -41,20 +58,29 @@ $(PKGNAME).so: $(OBJS) rpcx.h
 #fame_svc:	fame_svc.c plus fame hli
 #	echo not yet
 
+# gcc -E gives pre-processor output, useful for debugging.
+#$(CC) -E $(WALL) $(PKG_CFLAGS) $(PKG_CPPFLAGS) -DMAIN $(NOTR) 
+#    $(LD_LIBS) $< $(LIBSRC) >getpadi.preOut
+
 ../exec/getpadi: getpadi.c $(LIBSRC) rpcx.h
-	$(CC) $(WALL) $(PKG_CFLAGS) $(PKG_CPPFLAGS) -DMAIN $(LD_LIBS) $< $(LIBSRC) -o $@
+	$(CC) $(WALL) $(PKG_CFLAGS) $(PKG_CPPFLAGS) -DMAIN $(NOTR) \
+	    $(LD_LIBS) $< $(LIBSRC) -o $@
 
 ../exec/putpadi: putpadi.c $(LIBSRC) rpcx.h
-	$(CC) $(WALL) $(PKG_CFLAGS) $(PKG_CPPFLAGS) -DMAIN $(LD_LIBS) $< $(LIBSRC) -o $@
+	$(CC) $(WALL) $(PKG_CFLAGS) $(PKG_CPPFLAGS) -DMAIN $(NOTR) \
+	    $(LD_LIBS) $< $(LIBSRC) -o $@
 
 ../exec/objectinfo: objectinfo.c $(LIBSRC) rpcx.h
-	$(CC) $(WALL) $(PKG_CFLAGS) $(PKG_CPPFLAGS) -DMAIN $(LD_LIBS) $< $(LIBSRC) -o $@
+	$(CC) $(WALL) $(PKG_CFLAGS) $(PKG_CPPFLAGS) -DMAIN $(NOTR) \
+	    $(LD_LIBS) $< $(LIBSRC) -o $@
 
 ../exec/getpwuid: getpwuid.c
-	$(CC) $(WALL) $(PKG_CFLAGS) $(PKG_CPPFLAGS) -DMAIN $(LD_LIBS)  $< gmalloc.c -o $@
+	$(CC) $(WALL) $(PKG_CFLAGS) $(PKG_CPPFLAGS) -DMAIN $(NOTR) \
+	    $(LD_LIBS)  $< gmalloc.c -o $@
 
 ../exec/x11arima: getpadi.c $(LIBSRC) rpcx.h
-	$(CC) $(WALL) $(PKG_CFLAGS) $(PKG_CPPFLAGS) -DMAIN -DX11ARIMA $(LD_LIBS) $< $(LIBSRC) -o $@
+	$(CC) $(WALL) $(PKG_CFLAGS) $(PKG_CPPFLAGS) -DMAIN $(NOTR) \
+	   -DX11ARIMA  $(LD_LIBS) $< $(LIBSRC) -o $@
 
 	
 rpcx_clnt.c  rpcx_svc.c  rpcx_xdr.c:	rpcx.h

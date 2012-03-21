@@ -1,6 +1,8 @@
-/*UD
- * SccsID: @(#)getpadi.c	1.6		12/1/95 BOC
- * File:   getpadi.c
+/*
+ *
+** Small changes to avoid abort and writing to stdout, disallowed in 
+** R-2.14.2. Copyright P.Gilbert 2012
+ *
  * Author: Hope Pioro
  * Date  : Sept 95
  *  Minor changes to remove compiler warnings. P. Gilbert, Nov 2009.
@@ -23,6 +25,17 @@
  * you must also use -DSPLUS. This will call S_alloc instead. (see makefile)
  *
 */
+
+
+#if defined(FAME_SVC)
+#define PADI_MAIN
+#define PADI_SVC
+#elif defined(FS_SVC)
+#define PADI_MAIN
+#define PADI_SVC
+#else
+#define PADI_CLIENT
+#endif
 
 /*IN*/
 #define _GNU_SOURCE
@@ -182,7 +195,11 @@ double *datadbl;		/* array to hold precision data */
     if (!(series_result = PadiGetSeries(&server, &range_arg)))
     {
 	sprintf(log_buf, "%s GetPadi(%s)", app_name, object_name);
-	PadiError(stdout, log_buf, Padi_OUT_OF_MEMORY, Padi_FATAL);
+#ifdef NOT_R_CLIENT
+	PadiError(stdout, log_buf, Padi_OUT_OF_MEMORY, Padi_FATAL); 
+#else
+	PadiErrorR(log_buf, Padi_OUT_OF_MEMORY, Padi_FATAL); 
+#endif
     }
 
     if (series_result->status)

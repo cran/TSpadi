@@ -1,6 +1,9 @@
 /*  
 ** Protocol for Application -- Database Interface
 **
+** Small changes to avoid abort and writing to stdout, disallowed in 
+** R-2.14.2. Copyright P.Gilbert 2012
+**
 ** Copyright 1995, 1996  Bank of Canada.
 **
 ** The user of this software has the right to use, reproduce and distribute it.
@@ -28,6 +31,8 @@
 #endif
 #endif
 
+#include <R.h>
+ 
 #include <string.h>
 #include <signal.h>
 #include <sys/types.h>
@@ -222,19 +227,15 @@ export char * PadiStatus PARAM1(int, status)
   } else if (status >= Padi_SVC_STATUS && status < Padi_CLNT_STATUS) {
     /* server errors are sent to client by RPC mechanism */
   } else if (status >= Padi_CLNT_STATUS && status < Padi_SYSTEM_STATUS) {
-#ifdef PADI_CLIENT
     switch (status) {
     case Padi_NO_CONNECTION:
       return clnt_spcreateerror("");
-
     case Padi_CLNT_SET_TIMEOUT:
       return "error setting client timeout period";
-
     default:
       return clnt_sperrno((enum clnt_stat)(status - Padi_CLNT_STATUS));
 
     }
-#endif
   } else if (status >= Padi_SYSTEM_STATUS && status < Padi_HOST_STATUS) {
       int i = (int)(status - Padi_SYSTEM_STATUS);
 
@@ -1082,7 +1083,14 @@ export void PadiFreeResult PARAM1(PadiResult_tp, result)
   free((char *)result);
 }
 
-export void PadiError PARAM4(FILE *, fp, PadiString_t, source, PadiStatus_t, status, int, severity)
+
+#ifndef NOT_R_CLIENT
+extern void error(const char *, ...);
+#endif
+  
+/*export void PadiError PARAM4(FILE *, fp, PadiString_t, source, PadiStatus_t, status, int, severity) */
+
+export void PadiError(FILE *fp, PadiString_t source, PadiStatus_t status, int severity)
 /*
 ** PADI Error Handler 
 **
@@ -1099,7 +1107,7 @@ export void PadiError PARAM4(FILE *, fp, PadiString_t, source, PadiStatus_t, sta
 **   Error severity:
 **
 **      Padi_WARNING, PadiError ==> log message and return.
-**      Padi_FATAL ==> log message and abort.
+**      Padi_FATAL ==> log message and error() to R (NOT abort).
 **
 ** FILES
 **   padi.c, padi.h
@@ -1133,15 +1141,12 @@ export void PadiError PARAM4(FILE *, fp, PadiString_t, source, PadiStatus_t, sta
 
 n = (PadiVerbose) ? 2 : 1;
 
-
-  for (n = (PadiVerbose) ? 2 : 1; n--; fp = stdout) {
-/*      fprintf(fp, "\n%s", ctime(&ltime));  */
-
+#ifdef NOT_R_CLIENT
+ for (n = (PadiVerbose) ? 2 : 1; n--; fp = stdout) { 
     if (status)
-      fprintf(fp, "\t%s %s# %d: %s.\n", source, s, status, 
-                                        PadiStatus(status));
+      fprintf(fp, "\t%s %s# %d: %s.\n", source, s, status, PadiStatus(status));
     else
-      fprintf(fp, "\t%s.\n", source);
+     fprintf(fp, "\t%s.\n", source);
   
     fflush(fp);
   }
@@ -1152,8 +1157,68 @@ n = (PadiVerbose) ? 2 : 1;
    termobject.user = Padi_EMPTY_STR;
    termobject.password = Padi_EMPTY_STR;
    PadiTerminate(&termobject);
-  exit(status);
+   exit(status);
+#else
+error(PadiStatus(status)); /* in fact, this routine should never be called for R client */
+#endif 
 }
+
+
+#ifndef NOT_R_CLIENT
+export void PadiErrorR(PadiString_t source, PadiStatus_t status, int severity)
+/*
+** PADI R Error Handler 
+** 
+** source
+**   Identifying text for error source.
+**
+** status
+**   Status code for error.
+**
+** severity
+**   Error severity:
+**
+**      Padi_WARNING, PadiError ==> log message and return.
+**      Padi_FATAL ==> log message and error() to R (NOT abort).
+*/
+{              
+  PadiTermArg_t termobject;
+  string_t s;
+  time_t ltime;
+  /*int n;*/
+
+ 
+  switch(severity) {
+  case Padi_WARNING:
+    s = "WARNING";
+    break;
+
+  case Padi_ERROR:
+    s = "ERROR";
+    break;
+
+  case Padi_FATAL:
+    s = "FATAL ERROR";
+    break;
+
+  default:
+    s = "s uninitialized";
+    break;
+  }
+
+  time( &ltime );
+
+  if (severity < Padi_FATAL)
+    return;
+
+   termobject.user = Padi_EMPTY_STR;
+   termobject.password = Padi_EMPTY_STR;
+   PadiTerminate(&termobject);
+   /* error(s); */
+   /* error(PadiStatus(status));*/
+   error("Padi fatal error");
+}
+#endif 
 
 #ifdef PADI_MAIN
 
